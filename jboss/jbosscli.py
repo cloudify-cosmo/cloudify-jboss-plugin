@@ -139,5 +139,3 @@ class JBossClientDomain(JBossClient):
         else:
             server_group_command = '--server-groups=' + ','.join(server_groups)
         Utils.append_command_flags(server_group_command, self.command_script)
-
-

@@ -46,7 +46,5 @@ class TestNexus(unittest.TestCase):
         self.assertEqual(code, 200)
         self.assertTrue(os.path.exists(util.tempdir + '/' + file_name))
 
-    #TODO: test with private key
-
 if __name__ == '__main__':
     unittest.main()
