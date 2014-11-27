@@ -1,0 +1,52 @@
+tosca_definitions_version: cloudify_dsl_1_0
+imports:
+  - http://www.getcloudify.org/spec/cloudify/3.1rc1/types.yaml
+
+plugins:
+    jboss:
+        executor: host_agent
+        source: jboss-plugin
+
+node_types:
+    jboss_server:
+        derived_from: cloudify.nodes.Root
+        properties:
+            ip: {}
+            artifact: {}
+            jboss-home-path: {}
+            user:
+                default: None
+            password:
+                default: None
+            nexus: {}
+
+node_templates:
+  myhost:
+    type: cloudify.nodes.Compute
+    properties:
+        ip: 127.0.0.1
+        cloudify_agent:
+            user: vagrant
+            key: /home/vagrant/.ssh/id_rsa
+            wait_started_timeout: 60
+
+  jboss_installer:
+    type: jboss_server
+    properties:
+        ip: 127.0.0.1:8888
+        jboss-home-path: /home/vagrant/EAP-6.2.0/jboss-eap-6.2
+        nexus: http://11.0.0.8:8081/nexus
+        artifact:
+            artifactId: jboss-helloworld
+            repositoryId: test_repository_id
+            groupId: testGroupId
+            extension: war
+            version: 1.0
+
+    interfaces:
+        cloudify.interfaces.lifecycle:
+            start: jboss.jboss.tasks.deploy
+            stop: jboss.jboss.tasks.undeploy
+    relationships:
+        -   type: cloudify.relationships.contained_in
+            target: myhost
