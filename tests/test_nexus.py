@@ -1,6 +1,3 @@
-# coding=utf-8
-
-
 ###############################################################################
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -23,26 +20,42 @@ from plugins import nexus as nc
 
 class TestNexus(unittest.TestCase):
     """
-        This is Nexus integration test. Nexus instance should be at 11.0.0.8:8080/nexus url
-        and should have jboss-helloworld.war in (repository id) test_repository_id, (artifact
-        name) jboss-helloworld, (version) 1.0, (group id) testGroupId, (type) war. Nexus should
-        have also anonymous user disabled and test user with credentials test:test created.
+        This is Nexus integration test. Nexus instance should be at
+        11.0.0.8:8080/nexus url and should have jboss-helloworld.war
+        in (repository id) test_repository_id, (artifact name)
+        jboss-helloworld, (version) 1.0, (group id) testGroupId,
+        (type) war. Nexus should have also anonymous user disabled
+        and test user with credentials test:test created.
     """
     def test_download_war_no_credentials(self):
-        parameters = {"r": "test_repository_id", "a": "jboss-helloworld", "v": "1.0", "g": "testGroupId", "p": "war"}
+        parameters = {"r": "test_repository_id",
+                      "a": "jboss-helloworld",
+                      "v": "1.0",
+                      "g": "testGroupId",
+                      "p": "war"}
         file_name = 'jboss-helloworld.war'
         util = utils.Utils()
         nexus = nc.NexusConnector()
-        code = nexus.download_war_file(parameters, file_name, util.tempdir)
+        code = nexus.download_war_file(parameters,
+                                       file_name,
+                                       util.tempdir)
         self.assertTrue(code == 403 or code == 401)
         self.assertFalse(os.path.exists(util.tempdir + '/' + file_name))
 
     def test_download_war_with_credentials(self):
-        parameters = {"r": "test_repository_id", "a": "jboss-helloworld", "v": "1.0", "g": "testGroupId", "p": "war"}
+        parameters = {"r": "test_repository_id",
+                      "a": "jboss-helloworld",
+                      "v": "1.0",
+                      "g": "testGroupId",
+                      "p": "war"}
         file_name = 'jboss-helloworld.war'
         util = utils.Utils()
         nexus = nc.NexusConnector()
-        code = nexus.download_war_file(parameters, file_name, util.tempdir, 'test', 'test')
+        code = nexus.download_war_file(parameters,
+                                       file_name,
+                                       util.tempdir,
+                                       'test',
+                                       'test')
         self.assertEqual(code, 200)
         self.assertTrue(os.path.exists(util.tempdir + '/' + file_name))
 

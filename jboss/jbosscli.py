@@ -1,6 +1,3 @@
-# coding=utf-8
-
-
 ###############################################################################
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -36,8 +33,8 @@ class JBossClient(object):
 
     def create_undeploy_command(self, war_name):
         """
-        Create undeploy command that is saved to file 'undeploy.cli' in temporary folder to get
-        invoked by jboss-cli.sh '--file' parameter
+        Create undeploy command that is saved to file 'script.cli'
+        in temporary folder to get invoked by jboss-cli.sh '--file' parameter
         :param war_name: name of war to be undeployed
         :return:
         """
@@ -47,8 +44,8 @@ class JBossClient(object):
 
     def create_deploy_command(self, war_name):
         """
-        Create deploy command that is saved to file 'deploy.cli' in temporary folder to get
-        invoked by jboss-cli.sh '--file' parameter
+        Create deploy command that is saved to file 'script.cli'
+        in temporary folder to get invoked by jboss-cli.sh '--file' parameter
         :param war_name: name of war to be deployed
         :return:
         """
@@ -56,26 +53,40 @@ class JBossClient(object):
         ctx.logger.info('Deploy command [{0}]'.format(deploy_command))
         Utils.append_command_to_file(deploy_command, self.command_script)
 
-    def create_datasource_command(self, datasource_name, jndi_name, driver_name, connection_url):
+    def create_datasource_command(self,
+                                  datasource_name,
+                                  jndi_name,
+                                  driver_name,
+                                  connection_url):
         """
-        Create datasource command that is saved to file 'datasource.cli' in temporary folder to get
-        invoked by jboss-cli.sh '--file' parameter
+        Create datasource command that is added to file 'script.cli'
+        in temporary folder to get invoked by jboss-cli.sh '--file' parameter
         :return:
         """
-        datasource_command = 'data-source add --name=' + datasource_name + ' --jndi-name=' + jndi_name +\
-                             ' --driver_name=' + driver_name + ' --connection_url=' + connection_url
-        ctx.logger.info('Data source command: [{0}]'.format(datasource_command))
+        datasource_command = 'data-source add --name=' + datasource_name + \
+                             ' --jndi-name=' + jndi_name +\
+                             ' --driver_name=' + driver_name + \
+                             ' --connection_url=' + connection_url
+        ctx.logger.info('Data source command: [{0}]'
+                        .format(datasource_command))
         Utils.append_command_to_file(datasource_command, self.command_script)
 
-    def create_xadatasource_command(self, datasource_name, jndi_name, driver_name, connection_url):
+    def create_xadatasource_command(self,
+                                    datasource_name,
+                                    jndi_name,
+                                    driver_name,
+                                    connection_url):
         """
-        Create datasource command that is saved to file 'datasource.cli' in temporary folder to get
-        invoked by jboss-cli.sh '--file' parameter
+        Create datasource command that is saved to file 'datasource.cli'
+        in temporary folder to get invoked by jboss-cli.sh '--file' parameter
         :return:
         """
-        datasource_command = 'data-source add --name=' + datasource_name + ' --jndi-name=' + jndi_name +\
-                             ' --driver_name=' + driver_name + ' --connection_url=' + connection_url
-        ctx.logger.info('Data source XA command: [{0}]'.format(datasource_command))
+        datasource_command = 'data-source add --name=' + datasource_name + \
+                             ' --jndi-name=' + jndi_name + \
+                             ' --driver_name=' + driver_name + \
+                             ' --connection_url=' + connection_url
+        ctx.logger.info('Data source XA command: [{0}]'
+                        .format(datasource_command))
         Utils.append_command_to_file(datasource_command, self.command_script)
 
     def create_enable_datasource_command(self, datasource_name):
@@ -86,10 +97,15 @@ class JBossClient(object):
     def run_script(self):
         Utils.append_command_to_file('run-batch', self.command_script)
         if self.user or self.password is None:
-            out = Utils.system(self.cli_path, '--file=' + self.command_script, '--controller=' + self.address)
+            out = Utils.system(self.cli_path,
+                               '--file=' + self.command_script,
+                               '--controller=' + self.address)
         else:
-            out = Utils.system(self.cli_path, '--file=' + self.command_script, '--controller=' + self.address,
-                               '--user=' + self.address, '--password=' + self.password)
+            out = Utils.system(self.cli_path,
+                               '--file=' + self.command_script,
+                               '--controller=' + self.address,
+                               '--user=' + self.address,
+                               '--password=' + self.password)
         if self.is_there_any_problem(out):
             ctx.logger.error(out)
         else:
@@ -97,7 +113,8 @@ class JBossClient(object):
 
     @staticmethod
     def is_there_any_problem(out):
-        result = re.compile(r'\b({0})\b'.format('failed'), flags=re.IGNORECASE).search(out)
+        result = re.compile(r'\b({0})\b'.format('failed'), flags=re.IGNORECASE)\
+            .search(out)
         if result is None:
             return False
         return True
@@ -107,15 +124,15 @@ class JBossClientDomain(JBossClient):
     """JBoss client of domain mode using jboss-cli.sh   """
     def create_deploy_command(self, war_name, server_groups=None):
         """
-        Create deploy command that is saved to file 'deploy.cli' in temporary folder to get
-        invoked by jboss-cli.sh '--file' parameter
+        Create deploy command that is saved to file 'script.cli'
+        in temporary folder to get invoked by jboss-cli.sh '--file' parameter
         :param war_name: name of war to be deployed
-        :param server_groups: list of server group names the deploy command should apply to,
-         if None "--all-server-groups" will be applied
+        :param server_groups: list of server group names the deploy command
+        should apply to, if None "--all-server-groups" will be applied
         :return:
         """
         super(JBossClientDomain, self).create_deploy_command(war_name)
-        #TODO: make test for server groups
+        # TODO: make test for server groups
         if server_groups is None:
             server_group_command = '--all-server-groups'
         else:
@@ -125,14 +142,14 @@ class JBossClientDomain(JBossClient):
 
     def create_undeploy_command(self, war_name, server_groups=None):
         """
-        Create undeploy command that is saved to file 'undeploy.cli' in temporary folder to get
-        invoked by jboss-cli.sh '--file' parameter
+        Create undeploy command that is saved to file 'script.cli'
+        in temporary folder to get invoked by jboss-cli.sh '--file' parameter
         :param war_name: name of war to be undeployed
-        :param server_groups: list of server group names the deploy command should apply to,
-        if None "--all-server-groups" will be applied
+        :param server_groups: list of server group names the deploy command
+        should apply to, if None "--all-server-groups" will be applied
         :return:
         """
-        #TODO: make test for server groups
+        # TODO: make test for server groups
         super(JBossClientDomain, self).create_undeploy_command(war_name)
         if server_groups is None:
             server_group_command = '--all-relevant-server-groups'

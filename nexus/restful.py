@@ -1,6 +1,3 @@
-# coding=utf-8
-
-
 ###############################################################################
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -32,7 +29,9 @@ class RestRequest:
     def add_authentication(user, password, request):
         if user is None or password is None:
             return request
-        base64string = base64.encodestring('%s:%s' % (user, password)).replace('\n', '')
+        base64string = base64\
+            .encodestring('%s:%s' % (user, password))\
+            .replace('\n', '')
         request.add_header("Authorization", "Basic %s" % base64string)
         return request
 
@@ -52,6 +51,7 @@ class RestRequest:
             output = url.read()
         except urllib2.HTTPError as e:
             code = e.code
-            ctx.logger.error('Error code: {0} Reason: {1}'.format(e.code, e.reason))
+            ctx.logger.error('Error code: {0} Reason: {1}'
+                             .format(e.code, e.reason))
         finally:
             return output, code

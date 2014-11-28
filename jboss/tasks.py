@@ -1,6 +1,3 @@
-# coding=utf-8
-
-
 ###############################################################################
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -68,4 +65,5 @@ def get_artifact_parameters():
 
 
 def get_filename():
-    return ctx.node.properties['artifact']['artifactId'] + '.' + ctx.node.properties['artifact']['extension']
+    return ctx.node.properties['artifact']['artifactId'] + \
+        '.' + ctx.node.properties['artifact']['extension']

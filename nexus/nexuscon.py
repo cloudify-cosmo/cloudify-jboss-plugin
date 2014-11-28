@@ -1,6 +1,3 @@
-# coding=utf-8
-
-
 ###############################################################################
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -30,15 +27,24 @@ class NexusConnector():
     def __init__(self):
         self.nexus_base_path = ctx.node.properties['nexus']
 
-    def download_file(self, parameters, output_file, tempdir, user=None, password=None):
+    def download_file(self,
+                      parameters,
+                      output_file,
+                      tempdir,
+                      user=None,
+                      password=None):
         """
         Download war file from Nexus that is
-        :param parameters: dictionary of artifact parameters: repoId, artifactId, version, groupId, type
+        :param parameters: dictionary of artifact parameters:
+        repoId, artifactId, version, groupId, type
         :param output_file: filename to save
         :return: None if everything ok, http error code otherwise
         """
         url = urllib.urlencode(parameters)
-        url = self.nexus_base_path + self.REST_PATH + self.MAVEN_CONTENT_PATH + '?' + url
+        url = self.nexus_base_path + \
+            self.REST_PATH + \
+            self.MAVEN_CONTENT_PATH + \
+            '?' + url
         ctx.logger.info('Requested url: [{0}]'.format(url))
         request = RestRequest.prepare_request(url, 'GET', user, password)
         out, code = RestRequest.process_request(request)
@@ -46,5 +52,6 @@ class NexusConnector():
             with open(tempdir + '/' + output_file, 'w') as f:
                 f.write(out)
         else:
-            ctx.logger.error("Error while downloading artifact : {0}".format(code))
+            ctx.logger.error("Error while downloading artifact : {0}"
+                             .format(code))
         return code
