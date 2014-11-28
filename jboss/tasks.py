@@ -12,11 +12,11 @@
 #   limitations under the License.
 ###############################################################################
 
-from cloudify.decorators import operation
-from cloudify import ctx
-from nexus import nexuscon
 import httplib
+from cloudify import ctx
+from cloudify.decorators import operation
 from jbosscli import JBossClient
+from nexus import nexuscon
 from utils import Utils
 
 

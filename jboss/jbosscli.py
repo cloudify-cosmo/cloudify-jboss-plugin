@@ -13,8 +13,8 @@
 ###############################################################################
 
 import re
-from utils import Utils
 from cloudify import ctx
+from utils import Utils
 
 
 class JBossClient(object):

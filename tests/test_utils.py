@@ -12,8 +12,8 @@
 #   limitations under the License.
 ###############################################################################
 
-import unittest
 import os
+import unittest
 from jboss import utils
 
 

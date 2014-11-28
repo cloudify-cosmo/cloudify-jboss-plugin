@@ -12,9 +12,9 @@
 #   limitations under the License.
 ###############################################################################
 
-import tempfile
 import os
 import shutil
+import tempfile
 import subprocess
 from cloudify import ctx
 

@@ -12,10 +12,11 @@
 #   limitations under the License.
 ###############################################################################
 
-import unittest
 import os
 import utils
-from plugins import nexus as nc
+import httplib
+import unittest
+from nexus import nexuscon
 
 
 class TestNexus(unittest.TestCase):
@@ -35,11 +36,11 @@ class TestNexus(unittest.TestCase):
                       "p": "war"}
         file_name = 'jboss-helloworld.war'
         util = utils.Utils()
-        nexus = nc.NexusConnector()
+        nexus = nexuscon.NexusConnector()
         code = nexus.download_war_file(parameters,
                                        file_name,
                                        util.tempdir)
-        self.assertTrue(code == 403 or code == 401)
+        self.assertTrue(code == httplib.UNAUTHORIZED or code == httplib.FORBIDDEN)
         self.assertFalse(os.path.exists(util.tempdir + '/' + file_name))
 
     def test_download_war_with_credentials(self):
@@ -56,7 +57,7 @@ class TestNexus(unittest.TestCase):
                                        util.tempdir,
                                        'test',
                                        'test')
-        self.assertEqual(code, 200)
+        self.assertEqual(code, httplib.OK)
         self.assertTrue(os.path.exists(util.tempdir + '/' + file_name))
 
 if __name__ == '__main__':
