@@ -40,7 +40,8 @@ class TestNexus(unittest.TestCase):
         code = nexus.download_war_file(parameters,
                                        file_name,
                                        util.tempdir)
-        self.assertTrue(code == httplib.UNAUTHORIZED or code == httplib.FORBIDDEN)
+        self.assertTrue(code == httplib.UNAUTHORIZED
+                        or code == httplib.FORBIDDEN)
         self.assertFalse(os.path.exists(util.tempdir + '/' + file_name))
 
     def test_download_war_with_credentials(self):
@@ -51,7 +52,7 @@ class TestNexus(unittest.TestCase):
                       "p": "war"}
         file_name = 'jboss-helloworld.war'
         util = utils.Utils()
-        nexus = nc.NexusConnector()
+        nexus = nexuscon.NexusConnector()
         code = nexus.download_war_file(parameters,
                                        file_name,
                                        util.tempdir,
