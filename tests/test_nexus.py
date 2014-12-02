@@ -13,10 +13,12 @@
 ###############################################################################
 
 import os
-import utils
 import httplib
 import unittest
+from cloudify.mocks import MockCloudifyContext
+from cloudify.state import current_ctx
 from nexus import nexuscon
+from jboss import utils
 
 
 class TestNexus(unittest.TestCase):
@@ -28,38 +30,42 @@ class TestNexus(unittest.TestCase):
         (type) war. Nexus should have also anonymous user disabled
         and test user with credentials test:test created.
     """
-    def test_download_war_no_credentials(self):
-        parameters = {"r": "test_repository_id",
-                      "a": "jboss-helloworld",
-                      "v": "1.0",
-                      "g": "testGroupId",
-                      "p": "war"}
-        file_name = 'jboss-helloworld.war'
-        util = utils.Utils()
-        nexus = nexuscon.NexusConnector()
-        code = nexus.download_war_file(parameters,
-                                       file_name,
-                                       util.tempdir)
-        self.assertTrue(code == httplib.UNAUTHORIZED
-                        or code == httplib.FORBIDDEN)
-        self.assertFalse(os.path.exists(util.tempdir + '/' + file_name))
+    def setUp(self):
+        ctx = MockCloudifyContext()
+        ctx.node.properties['nexus'] = "http://repo.maven.apache.org/maven2/"
+        current_ctx.set(ctx)
 
-    def test_download_war_with_credentials(self):
-        parameters = {"r": "test_repository_id",
-                      "a": "jboss-helloworld",
-                      "v": "1.0",
-                      "g": "testGroupId",
-                      "p": "war"}
-        file_name = 'jboss-helloworld.war'
+    def test_download_file_no_credentials(self):
+        parameters = {"r": "central",
+                      "a": "HTTPClient",
+                      "v": "0.3-3",
+                      "g": "HTTPClient",
+                      "p": "jar"}
+        file_name = 'HTTPClient.jar'
         util = utils.Utils()
         nexus = nexuscon.NexusConnector()
-        code = nexus.download_war_file(parameters,
-                                       file_name,
-                                       util.tempdir,
-                                       'test',
-                                       'test')
-        self.assertEqual(code, httplib.OK)
+        code = nexus.download_file(parameters,
+                                   file_name,
+                                   util.tempdir)
+        self.assertTrue(code == httplib.OK)
         self.assertTrue(os.path.exists(util.tempdir + '/' + file_name))
+
+    # def test_download_with_credentials(self):
+    #     parameters = {"r": "test_repository_id",
+    #                   "a": "jboss-helloworld",
+    #                   "v": "1.0",
+    #                   "g": "testGroupId",
+    #                   "p": "war"}
+    #     file_name = 'jboss-helloworld.war'
+    #     util = utils.Utils()
+    #     nexus = nexuscon.NexusConnector()
+    #     code = nexus.download_war_file(parameters,
+    #                                    file_name,
+    #                                    util.tempdir,
+    #                                    'test',
+    #                                    'test')
+    #     self.assertEqual(code, httplib.OK)
+    #     self.assertTrue(os.path.exists(util.tempdir + '/' + file_name))
 
 if __name__ == '__main__':
     unittest.main()

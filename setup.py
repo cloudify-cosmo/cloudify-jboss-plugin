@@ -16,7 +16,7 @@ from setuptools import setup, find_packages
 
 setup(
 
-    name='jboss-plugin',
+    name='cloudify-jboss-plugin',
 
     version='0.1',
     author='Anna Szpoton',
@@ -28,10 +28,6 @@ setup(
     license='LICENSE',
     zip_safe=False,
     install_requires=[
-        "cloudify-plugins-common==3.1rc1"
-    ],
-    test_requires=[
-        "cloudify-dsl-parser==3.1rc1"
-        "nose"
+        "cloudify-plugins-common==3.1rc2"
     ]
 )

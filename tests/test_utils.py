@@ -14,10 +14,16 @@
 
 import os
 import unittest
+from cloudify.mocks import MockCloudifyContext
+from cloudify.state import current_ctx
 from jboss import utils
 
 
 class TestUtils(unittest.TestCase):
+
+    def setUp(self):
+        ctx = MockCloudifyContext()
+        current_ctx.set(ctx)
 
     def test_utils_temp_folder(self):
         util = utils.Utils()
@@ -42,7 +48,7 @@ class TestUtils(unittest.TestCase):
         flags = '--Flags'
         util.append_command_flags(flags, filename)
         f = open(filename, 'r')
-        self.assertEqual(f.read(), command + flags)
+        self.assertEqual(f.read(), command + ' ' + flags)
 
     def test_utils_append_command_to_script(self):
         util = utils.Utils()
