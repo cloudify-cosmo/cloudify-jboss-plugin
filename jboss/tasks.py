@@ -16,54 +16,33 @@ import httplib
 from cloudify import ctx
 from cloudify.decorators import operation
 from jbosscli import JBossClient
-from nexus import nexuscon
 from utils import Utils
 
 
 @operation
-def deploy(*args, **kwargs):
+def deploy(jboss, **kwargs):
     ctx.logger.info('Starting deploy')
     utils = Utils()
-    file_name = get_filename()
-    parameters = get_artifact_parameters()
-    ctx.logger.info('Deployment filename {0}'.format(file_name))
-    nexus = nexuscon.NexusConnector()
-    if nexus.download_file(parameters, file_name, utils.tempdir) != httplib.OK:
-        ctx.logger.info("There is no file to be deployed. Exiting.")
-        return
-    ctx.logger.info('File ' + file_name)
-    jcli = JBossClient(utils.tempdir)
-    jcli.create_deploy_command(file_name)
+    resource_name = "dummy.war"
+    ctx.logger.info('Deployment filename {0}'.format(resource_name))
+    jcli = JBossClient(utils.tempdir, jboss)
+    resource_dir = jboss['resource_dir']
+    jcli.create_deploy_command(resource_dir, resource_name)
     jcli.run_script()
+    #remember to remove files after deploy
 
 
 @operation
-def undeploy(*args, **kwargs):
+def undeploy(jboss, **kwargs):
     ctx.logger.info('Starting undeploy')
     utils = Utils()
-    file_name = get_filename()
     ctx.logger.info('Filename to undeploy ' + file_name)
-    jcli = JBossClient(utils.tempdir)
-    jcli.create_undeploy_command(file_name)
+    jcli = JBossClient(utils.tempdir, jboss)
+    jcli.create_undeploy_command("dummy.war")
     jcli.run_script()
 
 
 @operation
-def redeploy(*args, **kwargs):
-    undeploy()
-    deploy()
-
-
-def get_artifact_parameters():
-    parameters = dict()
-    parameters['a'] = ctx.node.properties['artifact']['artifactId']
-    parameters['r'] = ctx.node.properties['artifact']['repositoryId']
-    parameters['p'] = ctx.node.properties['artifact']['extension']
-    parameters['g'] = ctx.node.properties['artifact']['groupId']
-    parameters['v'] = ctx.node.properties['artifact']['version']
-    return parameters
-
-
-def get_filename():
-    return ctx.node.properties['artifact']['artifactId'] + \
-        '.' + ctx.node.properties['artifact']['extension']
+def redeploy(jboss, **kwargs):
+    undeploy(jboss)
+    deploy(jboss)

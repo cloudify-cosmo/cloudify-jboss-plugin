@@ -20,12 +20,12 @@ from utils import Utils
 class JBossClient(object):
     """JBoss Client of standalone mode using jboss-cli.sh """
 
-    def __init__(self, tempdir):
+    def __init__(self, tempdir, parameters):
         self.tempdir = tempdir
-        self.address = ctx.node.properties['ip']
-        self.user = ctx.node.properties.get('user')
-        self.password = ctx.node.properties.get('password')
-        self.home_path = ctx.node.properties['jboss-home-path']
+        self.address = parameters['ip']
+        self.user = parameters.get('user')
+        self.password = parameters.get('password')
+        self.home_path = parameters['home_path']
         self.cli_path = self.home_path + '/bin/jboss-cli.sh'
         self.command_script = self.tempdir + '/script.cli'
         command = 'connect \nbatch'
@@ -42,14 +42,14 @@ class JBossClient(object):
         ctx.logger.info('Undeploy command [{0}]'.format(undeploy_command))
         Utils.append_command_to_file(undeploy_command, self.command_script)
 
-    def create_deploy_command(self, war_name):
+    def create_deploy_command(self, resource_name, resource_dir):
         """
         Create deploy command that is saved to file 'script.cli'
         in temporary folder to get invoked by jboss-cli.sh '--file' parameter
-        :param war_name: name of war to be deployed
+        :param resource_path full path to resource
         :return:
         """
-        deploy_command = 'deploy' + ' ' + self.tempdir + '/' + war_name
+        deploy_command = 'deploy' + ' ' + resource_dir + '/' + resource_name
         ctx.logger.info('Deploy command [{0}]'.format(deploy_command))
         Utils.append_command_to_file(deploy_command, self.command_script)
 
@@ -132,7 +132,6 @@ class JBossClientDomain(JBossClient):
         :return:
         """
         super(JBossClientDomain, self).create_deploy_command(war_name)
-        # TODO: make test for server groups
         if server_groups is None:
             server_group_command = '--all-server-groups'
         else:
@@ -149,7 +148,6 @@ class JBossClientDomain(JBossClient):
         should apply to, if None "--all-server-groups" will be applied
         :return:
         """
-        # TODO: make test for server groups
         super(JBossClientDomain, self).create_undeploy_command(war_name)
         if server_groups is None:
             server_group_command = '--all-relevant-server-groups'

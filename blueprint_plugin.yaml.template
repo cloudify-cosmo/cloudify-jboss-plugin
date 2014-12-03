@@ -5,20 +5,10 @@ imports:
 plugins:
   jboss:
     executor: host_agent
-    source: jboss-plugin
-
-node_types:
-  jboss_server:
-    derived_from: cloudify.nodes.Root
-    properties:
-      ip: {}
-      artifact: {}
-      jboss-home-path: {}
-      user:
-        default: None
-      password:
-        default: None
-      nexus: {}
+    source: cloudify-jboss-plugin
+  nexus:
+    executor: host_agent
+    source: cloudify-nexus-plugin
 
 node_templates:
   myhost:
@@ -30,23 +20,33 @@ node_templates:
         key: /home/vagrant/.ssh/id_rsa
         wait_started_timeout: 60
 
-  jboss_installer:
-    type: jboss_server
-    properties:
-      ip: 127.0.0.1:8888
-      jboss-home-path: /home/vagrant/EAP-6.2.0/jboss-eap-6.2
-      nexus: http://11.0.0.8:8081/nexus
-      artifact:
-        artifactId: jboss-helloworld
-        repositoryId: test_repository_id
-        groupId: testGroupId
-        extension: war
-        version: 1.0
-
+  jboss_server:
+    type: cloudify.nodes.Root
     interfaces:
       cloudify.interfaces.lifecycle:
-        start: jboss.jboss.tasks.deploy
-        stop: jboss.jboss.tasks.undeploy
+        create: 
+          implementation: nexus.nexus.tasks.download
+          inputs:
+            address: http://11.0.0.8:8081/nexus
+            artifact:
+              artifactId: jboss-helloworld
+              repositoryId: test_repository_id
+              groupId: testGroupId
+              extension: war
+              version: 1.0
+            tempdir: /tmp
+        start: 
+          implementation: jboss.jboss.tasks.deploy
+          inputs:
+            jboss:
+              ip: 127.0.0.1:8888
+              home_path: /home/vagrant/EAP-6.2.0/jboss-eap-6.2
+              resource_dir: /tmp
+                
+        stop:   
+          implementation: jboss.jboss.tasks.undeploy
+          inputs:
+            jboss2: {}
     relationships:
       - type: cloudify.relationships.contained_in
         target: myhost
