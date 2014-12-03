@@ -20,7 +20,7 @@ from nexus.restful import RestRequest
 
 class NexusConnector():
     """ Nexus Rest connector  """
-    REST_PATH = u'/service/local'
+    LOCAL_REST_PATH = u'/service/local'
     MAVEN_CONTENT_PATH = u'/artifact/maven/content'
     REDIRECT_PATH = u'redirect'
 
@@ -42,7 +42,7 @@ class NexusConnector():
         """
         url = urllib.urlencode(parameters)
         url = self.nexus_base_path + \
-            self.REST_PATH + \
+            self.LOCAL_REST_PATH + \
             self.MAVEN_CONTENT_PATH + \
             '?' + url
         ctx.logger.info('Requested url: [{0}]'.format(url))
