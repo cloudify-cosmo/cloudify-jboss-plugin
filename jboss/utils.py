@@ -71,3 +71,9 @@ class Utils:
         process = subprocess.Popen(args, **kwargs)
         out, err = process.communicate()
         return out
+
+    @staticmethod
+    def delete_file(filepath):
+        if os.path.exists(filepath):
+            os.remove(filepath)
+            ctx.logger.info('File removed: [{0}]'.format(filepath))

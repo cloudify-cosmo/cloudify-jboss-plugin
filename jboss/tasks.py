@@ -23,22 +23,23 @@ from utils import Utils
 def deploy(jboss, **kwargs):
     ctx.logger.info('Starting deploy')
     utils = Utils()
-    resource_name = "dummy.war"
+    resource_name = jboss['resource_name']
     ctx.logger.info('Deployment filename {0}'.format(resource_name))
     jcli = JBossClient(utils.tempdir, jboss)
     resource_dir = jboss['resource_dir']
     jcli.create_deploy_command(resource_dir, resource_name)
     jcli.run_script()
-    #remember to remove files after deploy
+    utils.delete_file(resource_dir + '/' + resource_name)
 
 
 @operation
 def undeploy(jboss, **kwargs):
     ctx.logger.info('Starting undeploy')
     utils = Utils()
-    ctx.logger.info('Filename to undeploy ' + file_name)
+    resource_name = jboss['resource_name']
+    ctx.logger.info('Filename to undeploy ' + resource_name)
     jcli = JBossClient(utils.tempdir, jboss)
-    jcli.create_undeploy_command("dummy.war")
+    jcli.create_undeploy_command(resource_name)
     jcli.run_script()
 
 

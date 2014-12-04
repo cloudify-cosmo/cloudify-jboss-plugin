@@ -42,7 +42,7 @@ class JBossClient(object):
         ctx.logger.info('Undeploy command [{0}]'.format(undeploy_command))
         Utils.append_command_to_file(undeploy_command, self.command_script)
 
-    def create_deploy_command(self, resource_name, resource_dir):
+    def create_deploy_command(self, resource_dir, resource_name):
         """
         Create deploy command that is saved to file 'script.cli'
         in temporary folder to get invoked by jboss-cli.sh '--file' parameter
