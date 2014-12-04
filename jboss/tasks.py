@@ -12,7 +12,6 @@
 #   limitations under the License.
 ###############################################################################
 
-import httplib
 from cloudify import ctx
 from cloudify.decorators import operation
 from jbosscli import JBossClient
