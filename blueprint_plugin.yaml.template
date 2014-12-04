@@ -35,6 +35,7 @@ node_templates:
               extension: war
               version: 1.0
             tempdir: /tmp
+            resource_name: jboss-helloworld.war
         start: 
           implementation: jboss.jboss.tasks.deploy
           inputs:
@@ -42,11 +43,15 @@ node_templates:
               ip: 127.0.0.1:8888
               home_path: /home/vagrant/EAP-6.2.0/jboss-eap-6.2
               resource_dir: /tmp
-                
+              resource_name: jboss-helloworld.war
         stop:   
           implementation: jboss.jboss.tasks.undeploy
           inputs:
-            jboss2: {}
+            jboss: 
+              ip: 127.0.0.1:8888
+              home_path: /home/vagrant/EAP-6.2.0/jboss-eap-6.2
+              resource_dir: /tmp
+              resource_name: jboss-helloworld.war
     relationships:
       - type: cloudify.relationships.contained_in
         target: myhost
