@@ -13,6 +13,7 @@
 ###############################################################################
 
 import re
+import shutil
 from cloudify import ctx
 from utils import Utils
 
@@ -58,7 +59,7 @@ class JBossClient(object):
         self.modules = '{0}/modules/org/{1}/main'.format(self.home_path,
                                                          driver_name)
         Utils.create_subdirs_recursively(self.modules)
-        shutil.copy(path_from, modules + '/{0}.jar'.format(driver_name))
+        shutil.copy(path_from, self.modules + '/{0}.jar'.format(driver_name))
         self.add_module_file(driver_name)
 
     def add_module_file(self, driver_name):
