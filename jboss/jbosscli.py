@@ -28,6 +28,7 @@ class JBossClient(object):
         self.home_path = parameters['home_path']
         self.cli_path = self.home_path + '/bin/jboss-cli.sh'
         self.command_script = self.tempdir + '/script.cli'
+        self.modules = self.home_path + '/modules'
         command = 'connect \nbatch'
         Utils.save_command_to_file(command, self.command_script)
 
@@ -52,6 +53,35 @@ class JBossClient(object):
         deploy_command = 'deploy' + ' ' + resource_dir + '/' + resource_name
         ctx.logger.info('Deploy command [{0}]'.format(deploy_command))
         Utils.append_command_to_file(deploy_command, self.command_script)
+
+    def install_jdbc_driver_as_core_module(self, driver_name, path_from):
+        self.modules = '{0}/modules/org/{1}/main'.format(self.home_path,
+                                                         driver_name)
+        Utils.create_subdirs_recursively(self.modules)
+        shutil.copy(path_from, modules + '/{0}.jar'.format(driver_name))
+        self.add_module_file(driver_name)
+
+    def add_module_file(self, driver_name):
+        text = '<module xmlns=\"urn:jboss:module:1.1\" name=\"org.{0}\">'\
+               '<resources>'\
+               '<resource-root path="{0}.jar"/>'\
+               '</resources>'\
+               '<dependencies>'\
+               '<module name=\"javax.api\"/>'\
+               '<module name=\"javax.transaction.api\"/>'\
+               '</dependencies>'\
+               '</module>' \
+            .format(driver_name)
+        file_path = self.modules + '/module.xml'
+        Utils.save_command_to_file(text, file_path)
+
+    def add_jdbc_driver_command(self, xa_datasource_class_name):
+        name = 'postgresql'
+        text = '/subsystem=datasources/jdbc-driver={0}:' \
+               'add(driver-module-name=org.{0},' \
+               'driver-xa-datasource-class-name={1})'\
+            .format(name, xa_datasource_class_name)
+        Utils.append_command_to_file(text, self.command_script)
 
     def create_datasource_command(self,
                                   datasource_name,
@@ -96,7 +126,7 @@ class JBossClient(object):
 
     def run_script(self):
         Utils.append_command_to_file('run-batch', self.command_script)
-        if self.user or self.password is None:
+        if (self.user is None) or (self.password is None):
             out = Utils.system(self.cli_path,
                                '--file=' + self.command_script,
                                '--controller=' + self.address)

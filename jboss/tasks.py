@@ -17,6 +17,18 @@ from cloudify.decorators import operation
 from jbosscli import JBossClient
 from utils import Utils
 
+@operation
+def install_driver(jboss, jdbc_driver, datasource, **kwargs):
+    ctx.logger.info('Starting driver installation')
+    jcli = JBossClient(utils.tempdir, jboss)
+    driver_name = jdbc_driver.get('name')
+    driver_path_from = jdbc_driver.get('path_from')
+    jcli.install_jdbc_driver_as_core_module(driver_name, driver_path_from)
+    jcli.create_datasource_command(datasource['name'],
+                                   datasource['jndi'],
+                                   driver_name,
+                                   datasource['url'])
+    jcli.create_enable_datasource_command(datasource['name'])
 
 @operation
 def deploy(jboss, **kwargs):

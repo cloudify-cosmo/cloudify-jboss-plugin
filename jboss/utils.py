@@ -77,3 +77,7 @@ class Utils:
         if os.path.exists(filepath):
             os.remove(filepath)
             ctx.logger.info('File removed: [{0}]'.format(filepath))
+
+    @staticmethod
+    def create_subdirs_recursively(path):
+        os.makedirs(path)
