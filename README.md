@@ -25,7 +25,7 @@ Basic how-to
 
 1.  Import the plugin in blueprint.
 
-2.  Add a node that uses .
+2.  Add a node that uses tasks from plugin.
 
 3.  In *inputs* for task deploy or undeploy:
     *   create `jboss` section,
@@ -87,6 +87,36 @@ node_templates:
       - type: cloudify.relationships.contained_in
         target: myhost
 
+Optionally you can jboss['admin'] and jboss['password'] parameters if authentication is needed by jboss.
+
+Installing driver how-to
+-----------
+
+To install JDBC driver and add datasource on JBoss you need to add following fields to 'start' inputs:
+            datasource:
+              name: postgreDS
+              jndi: java:jboss/datasources/postgreDS
+              xa-class-name: org.postgresql.xa.PGXADataSource
+              driver-class-name: org.postgresql.Driver
+              url: jdbc:postgresql://localhost:5432/dbname
+            jdbc_driver:
+              name: postgresql
+              path-from: /tmp/postgresql.jar
+              org-com: org
+
+Explanation of parameters:
+datasource - group of parameters (dictionary) containing parameters defining datasource
+-- name: name of desired datasource
+-- jndi: jndi name upon which this datasource will be registered
+-- xa-class-name: class name for XA datasources
+-- driver-class-name: class name for driver
+-- url: url to access database
+
+jdbc_driver- group of parameters (dictionary) containing parameters defining jndi-driver
+-- name: name which will be used by datasource to determine which driver to use
+-- path-from: absolute location of driver jar
+-- org-com: determines which path should be saved and registered
+
 #### Assumptions for the above example ####
 
 *   Both `plugin.yaml` and `plugin.zip` are served on `localhost:8001`.
@@ -94,4 +124,5 @@ node_templates:
 *   JBoss management is available on `localhost:8888`.
 *   User `cloudify_user` exists and can be accessed with
     `my secret password`.
-
+*   Postgresql is installed on localhost and available at 5432 port, has dbname database set and is up and running.
+*   File postgresql.jar is located at /tmp/postgresql.jar.

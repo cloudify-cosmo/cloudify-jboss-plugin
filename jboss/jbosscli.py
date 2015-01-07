@@ -21,19 +21,22 @@ from utils import Utils
 class JBossClient(object):
     """JBoss Client of standalone mode using jboss-cli.sh """
 
-    def __init__(self, tempdir, parameters):
+    def __init__(self,
+                 tempdir,
+                 parameters):
         self.tempdir = tempdir
         self.address = parameters['ip']
         self.user = parameters.get('user')
         self.password = parameters.get('password')
-        self.home_path = parameters['home_path']
+        self.home_path = parameters['home-path']
         self.cli_path = self.home_path + '/bin/jboss-cli.sh'
         self.command_script = self.tempdir + '/script.cli'
         self.modules = self.home_path + '/modules'
         command = 'connect \nbatch'
         Utils.save_command_to_file(command, self.command_script)
 
-    def create_undeploy_command(self, war_name):
+    def create_undeploy_command(self,
+                                war_name):
         """
         Create undeploy command that is saved to file 'script.cli'
         in temporary folder to get invoked by jboss-cli.sh '--file' parameter
@@ -44,7 +47,9 @@ class JBossClient(object):
         ctx.logger.info('Undeploy command [{0}]'.format(undeploy_command))
         Utils.append_command_to_file(undeploy_command, self.command_script)
 
-    def create_deploy_command(self, resource_dir, resource_name):
+    def create_deploy_command(self,
+                              resource_dir,
+                              resource_name):
         """
         Create deploy command that is saved to file 'script.cli'
         in temporary folder to get invoked by jboss-cli.sh '--file' parameter
@@ -55,33 +60,46 @@ class JBossClient(object):
         ctx.logger.info('Deploy command [{0}]'.format(deploy_command))
         Utils.append_command_to_file(deploy_command, self.command_script)
 
-    def install_jdbc_driver_as_core_module(self, driver_name, path_from):
-        self.modules = '{0}/modules/org/{1}/main'.format(self.home_path,
+    def install_jdbc_driver_as_core_module(self,
+                                           driver_name,
+                                           path_from,
+                                           org_com):
+        self.modules = '{0}/modules/{1}/{2}/main'.format(self.home_path,
+                                                         org_com,
                                                          driver_name)
         Utils.create_subdirs_recursively(self.modules)
         shutil.copy(path_from, self.modules + '/{0}.jar'.format(driver_name))
-        self.add_module_file(driver_name)
+        self.add_module_file(driver_name, org_com)
 
-    def add_module_file(self, driver_name):
-        text = '<module xmlns=\"urn:jboss:module:1.1\" name=\"org.{0}\">'\
+    def add_module_file(self,
+                        driver_name,
+                        org_com):
+        text = '<module xmlns=\"urn:jboss:module:1.1\" name=\"{0}.{1}\">'\
                '<resources>'\
-               '<resource-root path="{0}.jar"/>'\
+               '<resource-root path="{1}.jar"/>'\
                '</resources>'\
                '<dependencies>'\
                '<module name=\"javax.api\"/>'\
                '<module name=\"javax.transaction.api\"/>'\
                '</dependencies>'\
                '</module>' \
-            .format(driver_name)
+            .format(org_com, driver_name)
         file_path = self.modules + '/module.xml'
         Utils.save_command_to_file(text, file_path)
 
-    def add_jdbc_driver_command(self, xa_datasource_class_name):
-        name = 'postgresql'
+    def add_jdbc_driver_command(self,
+                                name,
+                                org_com,
+                                xa_datasource_class_name,
+                                driver_class_name):
         text = '/subsystem=datasources/jdbc-driver={0}:' \
-               'add(driver-module-name=org.{0},' \
-               'driver-xa-datasource-class-name={1})'\
-            .format(name, xa_datasource_class_name)
+               'add(driver-name={0}, driver-module-name={1}.{0},' \
+               'driver-xa-datasource-class-name={2},' \
+               'driver-class-name={3})'\
+            .format(name,
+                    org_com,
+                    xa_datasource_class_name,
+                    driver_class_name)
         Utils.append_command_to_file(text, self.command_script)
 
     def create_datasource_command(self,
@@ -96,8 +114,8 @@ class JBossClient(object):
         """
         datasource_command = 'data-source add --name=' + datasource_name + \
                              ' --jndi-name=' + jndi_name +\
-                             ' --driver_name=' + driver_name + \
-                             ' --connection_url=' + connection_url
+                             ' --driver-name=' + driver_name + \
+                             ' --connection-url=' + connection_url
         ctx.logger.info('Data source command: [{0}]'
                         .format(datasource_command))
         Utils.append_command_to_file(datasource_command, self.command_script)
@@ -120,7 +138,8 @@ class JBossClient(object):
                         .format(datasource_command))
         Utils.append_command_to_file(datasource_command, self.command_script)
 
-    def create_enable_datasource_command(self, datasource_name):
+    def create_enable_datasource_command(self,
+                                         datasource_name):
         enable_command = 'data-source enable --name=' + datasource_name
         ctx.logger.info('Enable command: [{0}]'.format(enable_command))
         Utils.append_command_to_file(enable_command, self.command_script)
@@ -135,7 +154,7 @@ class JBossClient(object):
             out = Utils.system(self.cli_path,
                                '--file=' + self.command_script,
                                '--controller=' + self.address,
-                               '--user=' + self.address,
+                               '--user=' + self.user,
                                '--password=' + self.password)
         if self.is_there_any_problem(out):
             ctx.logger.error(out)
@@ -153,7 +172,9 @@ class JBossClient(object):
 
 class JBossClientDomain(JBossClient):
     """JBoss client of domain mode using jboss-cli.sh   """
-    def create_deploy_command(self, war_name, server_groups=None):
+    def create_deploy_command(self,
+                              war_name,
+                              server_groups=None):
         """
         Create deploy command that is saved to file 'script.cli'
         in temporary folder to get invoked by jboss-cli.sh '--file' parameter
@@ -170,7 +191,9 @@ class JBossClientDomain(JBossClient):
 
         Utils.append_command_flags(server_group_command, self.command_script)
 
-    def create_undeploy_command(self, war_name, server_groups=None):
+    def create_undeploy_command(self,
+                                war_name,
+                                server_groups=None):
         """
         Create undeploy command that is saved to file 'script.cli'
         in temporary folder to get invoked by jboss-cli.sh '--file' parameter

@@ -18,39 +18,48 @@ from jbosscli import JBossClient
 from utils import Utils
 
 
-@operation
-def install_driver(jboss, jdbc_driver, datasource, **kwargs):
+def install_driver(jcli,
+                   jdbc_driver,
+                   datasource,
+                   **kwargs):
     ctx.logger.info('Starting driver installation')
-    utils = Utils()
-    jcli = JBossClient(utils.tempdir, jboss)
-    driver_name = jdbc_driver.get('name')
-    driver_path_from = jdbc_driver.get('path_from')
-    jcli.install_jdbc_driver_as_core_module(driver_name, driver_path_from)
+    jcli.install_jdbc_driver_as_core_module(jdbc_driver['name'],
+                                            jdbc_driver['path-from'],
+                                            jdbc_driver['org-com'])
+    jcli.add_jdbc_driver_command(jdbc_driver['name'],
+                                 jdbc_driver['org-com'],
+                                 datasource['xa-class-name'],
+                                 datasource['driver-class-name'])
     jcli.create_datasource_command(datasource['name'],
                                    datasource['jndi'],
-                                   driver_name,
+                                   jdbc_driver['name'],
                                    datasource['url'])
     jcli.create_enable_datasource_command(datasource['name'])
 
 
 @operation
-def deploy(jboss, **kwargs):
+def deploy(jboss,
+           jdbc_driver=None,
+           datasource=None,
+           **kwargs):
     ctx.logger.info('Starting deploy')
     utils = Utils()
-    resource_name = jboss['resource_name']
+    resource_name = jboss['resource-name']
     ctx.logger.info('Deployment filename {0}'.format(resource_name))
     jcli = JBossClient(utils.tempdir, jboss)
-    resource_dir = jboss['resource_dir']
+    resource_dir = jboss['resource-dir']
+    if (jdbc_driver is not None) and (datasource is not None):
+        install_driver(jcli, jdbc_driver, datasource)
     jcli.create_deploy_command(resource_dir, resource_name)
     jcli.run_script()
-    utils.delete_file(resource_dir + '/' + resource_name)
 
 
 @operation
-def undeploy(jboss, **kwargs):
+def undeploy(jboss,
+             **kwargs):
     ctx.logger.info('Starting undeploy')
     utils = Utils()
-    resource_name = jboss['resource_name']
+    resource_name = jboss['resource-name']
     ctx.logger.info('Filename to undeploy ' + resource_name)
     jcli = JBossClient(utils.tempdir, jboss)
     jcli.create_undeploy_command(resource_name)
@@ -58,6 +67,7 @@ def undeploy(jboss, **kwargs):
 
 
 @operation
-def redeploy(jboss, **kwargs):
+def redeploy(jboss,
+             **kwargs):
     undeploy(jboss)
     deploy(jboss)

@@ -6,9 +6,6 @@ plugins:
   jboss:
     executor: host_agent
     source: cloudify-jboss-plugin
-  nexus:
-    executor: host_agent
-    source: cloudify-nexus-plugin
 
 node_templates:
   myhost:
@@ -17,41 +14,50 @@ node_templates:
       ip: 127.0.0.1
       cloudify_agent:
         user: vagrant
-        key: /home/vagrant/.ssh/id_rsa
+        key: /home/vagrant/.ssh/secure
         wait_started_timeout: 60
 
   jboss_server:
     type: cloudify.nodes.Root
     interfaces:
       cloudify.interfaces.lifecycle:
-        create: 
-          implementation: nexus.nexus.tasks.download
-          inputs:
-            address: http://11.0.0.8:8081/nexus
-            artifact:
-              artifactId: jboss-helloworld
-              repositoryId: test_repository_id
-              groupId: testGroupId
-              extension: war
-              version: 1.0
-            tempdir: /tmp
-            resource_name: jboss-helloworld.war
+#        create: 
+#          implementation: nexus.nexus.tasks.download
+#          inputs:
+#            address: http://11.0.0.8:8081/nexus
+#            artifact:
+#              artifactId: jboss-helloworld
+#              repositoryId: test_repository_id
+#              groupId: testGroupId
+#              extension: war
+#              version: 1.0
+#           tempdir: /tmp
+#            resource_name: mongohello.war
         start: 
           implementation: jboss.jboss.tasks.deploy
           inputs:
             jboss:
-              ip: 127.0.0.1:8888
-              home_path: /home/vagrant/EAP-6.2.0/jboss-eap-6.2
+              ip: localhost:8888
+              home_path: /home/vagrant/jboss-eap-6.2
               resource_dir: /tmp
-              resource_name: jboss-helloworld.war
+              resource_name: mongohello.war
+            datasource:
+              name: postgreDS
+              jndi: java:jboss/datasources/postgreDS
+              xa-class-name: org.postgresql.xa.PGXADataSource
+              driver-class-name: org.postgresql.Driver
+              url: jdbc:postgresql://localhost:5432/dbname
+            jdbc_driver:
+              name: postgresql
+              path_from: /tmp/postgresql.jar
         stop:   
           implementation: jboss.jboss.tasks.undeploy
           inputs:
             jboss: 
-              ip: 127.0.0.1:8888
+              ip: 11.0.0.9:8888
               home_path: /home/vagrant/EAP-6.2.0/jboss-eap-6.2
               resource_dir: /tmp
-              resource_name: jboss-helloworld.war
+              resource_name: mongohello.war
     relationships:
       - type: cloudify.relationships.contained_in
         target: myhost
