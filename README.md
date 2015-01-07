@@ -49,43 +49,45 @@ Basic how-to
 
 The following is a basic working example:
 
-tosca_definitions_version: cloudify_dsl_1_0
-imports:
-  - http://www.getcloudify.org/spec/cloudify/3.1rc1/types.yaml
-  - http://127.0.0.1:8001/plugin.yaml
 
-node_templates:
-  myhost:
-    type: cloudify.nodes.Compute
-    properties:
-      ip: 127.0.0.1
-      cloudify_agent:
-        user: cloudify_user
-        key: /home/cloudify_user/.ssh/id_rsa
+    tosca_definitions_version: cloudify_dsl_1_0
+    imports:
+      - http://www.getcloudify.org/spec/cloudify/3.1rc1/types.yaml
+      - http://127.0.0.1:8001/plugin.yaml
 
-  jboss_server:
-    type: cloudify.nodes.Root
-    interfaces:
-      cloudify.interfaces.lifecycle:
-        start: 
-          implementation: jboss.jboss.tasks.deploy
-          inputs:
-            jboss:
-              ip: 127.0.0.1:8888
-              home_path: /home/vagrant/EAP-6.2.0/jboss-eap-6.2
-              resource_dir: /tmp
-              resource_name: jboss-helloworld.war
-        stop:   
-          implementation: jboss.jboss.tasks.undeploy
-          inputs:
-            jboss: 
-              ip: 127.0.0.1:8888
-              home_path: /home/vagrant/EAP-6.2.0/jboss-eap-6.2
-              resource_dir: /tmp
-              resource_name: jboss-helloworld.war
-    relationships:
-      - type: cloudify.relationships.contained_in
-        target: myhost
+    node_templates:
+      myhost:
+        type: cloudify.nodes.Compute
+        properties:
+          ip: 127.0.0.1
+          cloudify_agent:
+            user: cloudify_user
+            key: /home/cloudify_user/.ssh/id_rsa
+
+      jboss_server:
+        type: cloudify.nodes.Root
+        interfaces:
+          cloudify.interfaces.lifecycle:
+            start: 
+              implementation: jboss.jboss.tasks.deploy
+              inputs:
+                jboss:
+                  ip: 127.0.0.1:8888
+                  home_path: /home/vagrant/EAP-6.2.0/jboss-eap-6.2
+                  resource_dir: /tmp
+                  resource_name: jboss-helloworld.war
+            stop:   
+              implementation: jboss.jboss.tasks.undeploy
+              inputs:
+                jboss: 
+                  ip: 127.0.0.1:8888
+                  home_path: /home/vagrant/EAP-6.2.0/jboss-eap-6.2
+                  resource_dir: /tmp
+                  resource_name: jboss-helloworld.war
+        relationships:
+          - type: cloudify.relationships.contained_in
+            target: myhost
+
 
 Optionally you can jboss['admin'] and jboss['password'] parameters if authentication is needed by jboss.
 
@@ -93,29 +95,36 @@ Installing driver how-to
 -----------
 
 To install JDBC driver and add datasource on JBoss you need to add following fields to 'start' inputs:
-            datasource:
-              name: postgreDS
-              jndi: java:jboss/datasources/postgreDS
-              xa-class-name: org.postgresql.xa.PGXADataSource
-              driver-class-name: org.postgresql.Driver
-              url: jdbc:postgresql://localhost:5432/dbname
-            jdbc_driver:
-              name: postgresql
-              path-from: /tmp/postgresql.jar
-              org-com: org
+
+                datasource:
+                  name: postgreDS
+                  jndi: java:jboss/datasources/postgreDS
+                  xa-class-name: org.postgresql.xa.PGXADataSource
+                  driver-class-name: org.postgresql.Driver
+                  url: jdbc:postgresql://localhost:5432/dbname
+                jdbc_driver:
+                  name: postgresql
+                  path-from: /tmp/postgresql.jar
+                  org-com: org
+
 
 Explanation of parameters:
-datasource - group of parameters (dictionary) containing parameters defining datasource
--- name: name of desired datasource
--- jndi: jndi name upon which this datasource will be registered
--- xa-class-name: class name for XA datasources
--- driver-class-name: class name for driver
--- url: url to access database
+----
 
-jdbc_driver- group of parameters (dictionary) containing parameters defining jndi-driver
--- name: name which will be used by datasource to determine which driver to use
--- path-from: absolute location of driver jar
--- org-com: determines which path should be saved and registered
+#### datasource - group of parameters (dictionary) containing parameters defining datasource ####
+
+*  name: name of desired datasource
+*  jndi: jndi name upon which this datasource will be registered
+*  xa-class-name: class name for XA datasources
+*  driver-class-name: class name for driver
+*  url: url to access database
+
+
+#### jdbc_driver- group of parameters (dictionary) containing parameters defining jndi-driver ####
+
+*   name: name which will be used by datasource to determine which driver to use
+*   path-from: absolute location of driver jar
+*   org-com: determines which path should be saved and registered
 
 #### Assumptions for the above example ####
 
