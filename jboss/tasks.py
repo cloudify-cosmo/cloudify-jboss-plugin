@@ -22,6 +22,14 @@ def install_driver(jcli,
                    jdbc_driver,
                    datasource,
                    **kwargs):
+    """
+    Handle jdbc driver installation.
+    :param jcli:
+    :param jdbc_driver:
+    :param datasource:
+    :param kwargs:
+    :return:
+    """
     ctx.logger.info('Starting driver installation')
     jcli.install_jdbc_driver_as_core_module(jdbc_driver['name'],
                                             jdbc_driver['path-from'],

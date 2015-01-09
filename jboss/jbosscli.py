@@ -53,7 +53,8 @@ class JBossClient(object):
         """
         Create deploy command that is saved to file 'script.cli'
         in temporary folder to get invoked by jboss-cli.sh '--file' parameter
-        :param resource_path full path to resource
+        :param resource_name: resource name
+        :param resource_dir: resource directory path
         :return:
         """
         deploy_command = 'deploy' + ' ' + resource_dir + '/' + resource_name
@@ -64,6 +65,14 @@ class JBossClient(object):
                                            driver_name,
                                            path_from,
                                            org_com):
+        """
+        Install jdbc driver as core module. Move driver jar to modules path
+        and call add_module_file().
+        :param driver_name: name of driver
+        :param path_from: path to copy driver jar from
+        :param org_com: type of driver {org, com}
+        :return:
+        """
         self.modules = '{0}/modules/{1}/{2}/main'.format(self.home_path,
                                                          org_com,
                                                          driver_name)
@@ -74,6 +83,13 @@ class JBossClient(object):
     def add_module_file(self,
                         driver_name,
                         org_com):
+        """
+        Add module.xml file in driver module directory registering driver
+        name and its dependencies.
+        :param driver_name: name of jboss jdbc driver user wants to give
+        :param org_com: type of driver {org, com}
+        :return:
+        """
         text = '<module xmlns=\"urn:jboss:module:1.1\" name=\"{0}.{1}\">'\
                '<resources>'\
                '<resource-root path="{1}.jar"/>'\
@@ -92,6 +108,16 @@ class JBossClient(object):
                                 org_com,
                                 xa_datasource_class_name,
                                 driver_class_name):
+        """
+        Add jdbc driver to standalone.xml configuration. Use jboss-cli.sh
+        command to add driver with specific information about module,
+        driver class and jdbc-driver name.
+        :param name: name of jboss jdbc driver user wants to give
+        :param org_com: type of driver {org, com}
+        :param xa_datasource_class_name: class name for XA datasource
+        :param driver_class_name: driver class name
+        :return:
+        """
         text = '/subsystem=datasources/jdbc-driver={0}:' \
                'add(driver-name={0}, driver-module-name={1}.{0},' \
                'driver-xa-datasource-class-name={2},' \
@@ -110,6 +136,10 @@ class JBossClient(object):
         """
         Create datasource command that is added to file 'script.cli'
         in temporary folder to get invoked by jboss-cli.sh '--file' parameter
+        :param datasource_name: name of datasource user wants to give
+        :param jndi_name: name of jndi on which datasource will be registered
+        :param driver_name: given driver name in installation
+        :param connection_url: connection url to database
         :return:
         """
         datasource_command = 'data-source add --name=' + datasource_name + \
@@ -128,6 +158,10 @@ class JBossClient(object):
         """
         Create datasource command that is saved to file 'datasource.cli'
         in temporary folder to get invoked by jboss-cli.sh '--file' parameter
+        :param datasource_name: name of data source user wants to give
+        :param jndi_name: name of jndi on which datasource will be registered
+        :param driver_name: given driver name in installation
+        :param connection_url: connection url to database
         :return:
         """
         datasource_command = 'data-source add --name=' + datasource_name + \
@@ -140,11 +174,20 @@ class JBossClient(object):
 
     def create_enable_datasource_command(self,
                                          datasource_name):
+        """
+        Set given data source enabled.
+        :param datasource_name: name of data source user want to enable
+        :return:
+        """
         enable_command = 'data-source enable --name=' + datasource_name
         ctx.logger.info('Enable command: [{0}]'.format(enable_command))
         Utils.append_command_to_file(enable_command, self.command_script)
 
     def run_script(self):
+        """
+        Run script
+        :return:
+        """
         Utils.append_command_to_file('run-batch', self.command_script)
         if (self.user is None) or (self.password is None):
             out = Utils.system(self.cli_path,
@@ -163,6 +206,13 @@ class JBossClient(object):
 
     @staticmethod
     def is_there_any_problem(out):
+        """
+        Parse given jboss-cli.sh output. In case of failed operation return
+        False, true otherwise. Jboss-cli rolls back all operations performed
+        in case one has failed.
+        :param out: jboss-cli.sh output
+        :return: True if all operation passed and False if one has failed
+        """
         result = re.compile(r'\b({0})\b'.format('failed'), flags=re.IGNORECASE)\
             .search(out)
         if result is None:

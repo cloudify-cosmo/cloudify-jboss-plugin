@@ -13,6 +13,7 @@
 ###############################################################################
 
 import os
+import errno
 import shutil
 import tempfile
 import subprocess
@@ -43,7 +44,7 @@ class Utils:
     @staticmethod
     def append_command_flags(flags_string, file_path):
         """
-        :param command: command to be put into file
+        :param flags_string: command to be put into file
         :param file_name: full path to command file
         :return:
         """
@@ -63,6 +64,7 @@ class Utils:
     @staticmethod
     def system(*args, **kwargs):
         """
+        Run system command.
         :param args: list of commandline arguments
         :param kwargs:
         :return:
@@ -74,10 +76,26 @@ class Utils:
 
     @staticmethod
     def delete_file(filepath):
+        """
+        Delete file from current filepath.
+        :param filepath: filepath
+        :return:
+        """
         if os.path.exists(filepath):
             os.remove(filepath)
             ctx.logger.info('File removed: [{0}]'.format(filepath))
 
     @staticmethod
     def create_subdirs_recursively(path):
-        os.makedirs(path)
+        """
+        Create all directories that are in path and no exist.
+        :param path: path to be created
+        :return:
+        """
+        try:
+            os.makedirs(path)
+        except OSError as e:
+            if e.errno == errno.EEXIST and os.path.isdir(path):
+                pass
+            else:
+                raise
