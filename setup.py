@@ -28,6 +28,6 @@ setup(
     license='LICENSE',
     zip_safe=False,
     install_requires=[
-        "cloudify-plugins-common==3.1rc2"
+        "cloudify-plugins-common==3.1"
     ]
 )

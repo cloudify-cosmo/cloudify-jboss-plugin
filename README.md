@@ -52,7 +52,7 @@ The following is a basic working example:
 
     tosca_definitions_version: cloudify_dsl_1_0
     imports:
-      - http://www.getcloudify.org/spec/cloudify/3.1rc1/types.yaml
+      - http://www.getcloudify.org/spec/cloudify/3.1/types.yaml
       - http://127.0.0.1:8001/plugin.yaml
 
     node_templates:
