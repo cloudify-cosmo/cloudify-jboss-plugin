@@ -1,6 +1,8 @@
 cloudify-jboss-plugin
 =====================
 
+* Master [![Circle CI](https://circleci.com/gh/cloudify-cosmo/cloudify-jboss-plugin/tree/master.svg?style=shield)](https://circleci.com/gh/cloudify-cosmo/cloudify-jboss-plugin/tree/master)
+
 Cloudify plugin for managing the JBoss application server
 
 This plugin was developed for Cloudify version 3.1 and is a part of the regression testing we’re doing therefore should be used with care. 
